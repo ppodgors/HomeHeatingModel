@@ -7,9 +7,9 @@ from window import Window
 from heater import Heater
 from door import Door
 import time
-rooms = {"I": Room(0, 50, 0, 39, (lambda x: 283 + np.random.random(x.shape))), "II": Room(0, 34, 40, 100,(lambda x: 290 + np.random.random(x.shape))),
-        "III": Room(35, 60, 40, 100,(lambda x: 286 + np.random.random(x.shape))),"IV": Room(61, 100, 40, 80,(lambda x: 287 + np.random.random(x.shape))),
-        "V": Room(61, 100, 81, 100,(lambda x: 288 + np.random.random(x.shape)))}
+rooms = {"I": Room(0, 50, 0, 39, (lambda x: 283 + np.random.random(x.shape))), "II": Room(0, 34, 40, 100,(lambda x: 285 + np.random.random(x.shape))),
+            "III": Room(35, 60, 40, 100,(lambda x: 286 + np.random.random(x.shape))),"IV": Room(61, 100, 40, 80,(lambda x: 287 + np.random.random(x.shape))),
+            "V": Room(61, 100, 81, 100,(lambda x: 282 + np.random.random(x.shape)))}
 windows = [Window(False, 75, 15, 0, "II"), Window(False, 50, 15, 0,"II"), Window(False, 10, 20, 0,"I"), 
             Window(True, 10, 15, 100,"II"), Window(True, 40, 15, 100,"III"), Window(True, 70, 20, 100,"V"),
             Window(False, 50, 20, 100,"IV"), Window(True, 15, 20, 0,"I")]
