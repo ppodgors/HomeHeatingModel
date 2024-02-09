@@ -32,13 +32,12 @@ def create_house_with_heater_levels(heater_levels):
 
     return House(params)
 
-def display_heatmap(frame_data, current_time):
+def display_heatmap(frame_data):
     fig, ax = plt.subplots()
     heatmap = ax.imshow(frame_data, cmap='coolwarm', interpolation='nearest')
     plt.colorbar(heatmap)
-    plt.title(f"Czas symulacji: {current_time} h")
     plt.close(fig)
-    return fig
+    return fig, heatmap
 
 def main():
     st.title("Symulacja rozkładu ciepła w domu")
@@ -51,13 +50,18 @@ def main():
 
     if st.button('Start symulacji'):
         home = create_house_with_heater_levels(heater_levels)
-        x,heat = home.solution(0.1,how_long)
+        x, heat = home.solution(0.1, how_long)
+        
+        fig, heatmap = display_heatmap(x[0])
+        placeholder.pyplot(fig)
 
-        for frame in range(0, len(x), 10):
-            current_time = round(frame/60,2)
+        for frame in range(1, len(x), 10):
+            current_time = round(frame / 60, 2)
             updated_state = x[frame]
-            fig = display_heatmap(updated_state, current_time)
+            heatmap.set_data(updated_state)
+            heatmap.axes.set_title(f"Czas symulacji: {current_time} h")
             placeholder.pyplot(fig)
             time.sleep(0.001)
+
 if __name__ == "__main__":
     main()
