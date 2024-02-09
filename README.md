@@ -15,7 +15,7 @@ Schemat mieszkania i rozkład wszystkich obiektów - `Home diagram.png`.
 
 ## Uruchomienie
 
-Aby uruchomić symulację należy uruchomić `main`. Alternatywnie, można użyć aplikacji interaktywnej `app.py` do zasymulowania ogrzewania, wybierając poziom grzejnika oraz czas trwania symulacji.
+Aby uruchomić symulację należy uruchomić `main`. Alternatywnie, można użyć aplikacji interaktywnej w serwisie streamlit.io ([link](https://homeheatingmodel-fvftdvvvwvqn3m6fn4nvoy.streamlit.app/)) do zasymulowania ogrzewania, wybierając poziom grzejnika oraz czas trwania symulacji.
 
 ## Technologie
 
