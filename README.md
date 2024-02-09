@@ -4,7 +4,8 @@ Projekt symulacji ogrzewania mieszkania pozwala na modelowanie i wizualizację r
 
 ## Wprowadzenie
 
-Model opiera się na równaniu reakcji-dyfuzji i uwzględnia różne warunki brzegowe dla okien, drzwi i ścian.
+Model opiera się na równaniu reakcji-dyfuzji i uwzględnia różne warunki brzegowe dla okien, drzwi i ścian. 
+Schemat mieszkania i rozkład wszystkich obiektów - `Home diagram.png`.
 
 ## Funkcje
 
