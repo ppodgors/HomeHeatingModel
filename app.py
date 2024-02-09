@@ -36,6 +36,8 @@ def display_heatmap(frame_data):
     fig, ax = plt.subplots()
     heatmap = ax.imshow(frame_data, cmap='coolwarm', interpolation='nearest')
     plt.colorbar(heatmap)
+    cbar = plt.colorbar(heatmap)
+    cbar.set_label('°C')
     plt.close(fig)
     return fig, heatmap
 
