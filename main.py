@@ -29,13 +29,10 @@ if __name__=="__main__":
         heatmap.set_array(data[frame_number])
         return [heatmap]
 
-    # Ustawienia początkowe animacji
     fig, ax = plt.subplots()
     heatmap = ax.imshow(x[0], cmap='hot', interpolation='nearest')
 
-    # Stworzenie animacji
     ani = animation.FuncAnimation(fig, update, frames=range(len(x)),
                                 fargs=(x, heatmap), blit=True)
 
-    # Wyświetlenie animacji
     HTML(ani.to_jshtml())
