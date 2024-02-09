@@ -1,5 +1,4 @@
-import numpy as np
-class Window:
+class Door:
     def __init__(self, horizontal, start_idx, length, position, room):
         self.horizontal = horizontal
         self.start_idx = start_idx
@@ -12,8 +11,6 @@ class Window:
         
     def is_horizontal(self):
         return self.horizontal
-    
+
     def room_nr(self):
         return self.room
-
-
