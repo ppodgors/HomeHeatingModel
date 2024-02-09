@@ -1,30 +1,36 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-import copy
 
 class House:
+    """
+    Klasa do modelowania domu i symulowania dystrybucji ciepła.
+
+    Atrybuty:
+        params (dict): Parametry konfiguracyjne
+        initial_rooms (dict): Słownik zawierający początkowe wartości ciepła pokoi, które są później aktualizowane w metodzie solution.
+        rooms_with_objects (dict): Słownik zawierający informacje o rozmieszczeniu grzejników, okien i drzwi w pokojach.
+        home (np.array): Macierz umożliwiająca narysowanie diagramu mieszkania
+        result_matrix (np.array): Macierz rozwiązań całego mieszkania
+    """
     def __init__(self,params):
         self.params = params
         self.initial_rooms= {}
         self.rooms_with_objects = {}
-        self.walls_in_rooms = {'I': [], 'II': [], 'III': [], 'IV': [], 'V': []}
         self.home = np.zeros((101,101))
         self.result_matrix = np.zeros((101,101))
         self.build_initial_matrices()
-        #abcd = self.build_result_matrix(self.rooms_with_objects,1)
-        #plt.imshow(abcd)
-        #plt.show()
-        #print(self.rooms_with_objects["V"][-2,:])
-        #print(self.rooms_with_objects["V"][-1,:])
-    def outside_temp(self, t):
-        T_srednia = -2.5  
-        A = 4.5           
-        T_okres = 24*60   
-        return T_srednia + A * np.sin(2 * np.pi / T_okres * t) + 273
 
-        
+    def outside_temp(self, t):
+        """
+        Metoda wyliczająca temperaturę na zewnątrz.
+        """
+        return -2.5 + 4.5 * np.sin(2 * np.pi / 24*60 * t) + 273
+      
     def build_initial_matrices(self, show = True):
+        """
+        Metoda uzupełniająca macierze pokojów o wartości początkowe. Zaznacza także obiekty na macierzach w słowniku rooms_with_objects.
+        """
         room_windows = {'I': [], 'II': [], 'III': [], 'IV': [], 'V': []}
         room_heaters = {'I': [], 'II': [], 'III': [], 'IV': [], 'V': []}
         room_doors = {'I': [], 'II': [], 'III': [], 'IV': [], 'V': []}
@@ -49,7 +55,6 @@ class House:
                     self.rooms_with_objects[key][(x-room.x_min()), (y_min-room.y_min()):(y_max-room.y_min())] = 1
                     self.initial_rooms[key][(x-room.x_min()), (y_min-room.y_min()):(y_max-room.y_min())] = self.outside_temp(0)
             for dict in [self.rooms_with_objects, self.initial_rooms]:
-                #dict[key] = dict[key][:-1,:-1]
                 dict[key][:,-2] = dict[key][:,-1]
                 dict[key][:,1] = dict[key][:,0]
                 dict[key][-2,:] = dict[key][-1,:]
@@ -61,9 +66,7 @@ class House:
                 else:
                     y_min, y_max, x = door.coordinates()
                     self.rooms_with_objects[key][(x-room.x_min()), (y_min-room.y_min()):(y_max-room.y_min())] = 2
-
             # adding heaters, values in [0.1, ... , 0.5]
-
             for heater in room_heaters[key]:
                 if not heater.is_horizontal():
                     x_min, x_max, y = heater.coordinates()
@@ -72,7 +75,6 @@ class House:
                     y_min, y_max, x = heater.coordinates()
                     self.rooms_with_objects[key][(x-room.x_min()), (y_min-room.y_min()):(y_max-room.y_min())] = heater.get_level()/10
             
-
             if key != "III":
                 self.rooms_with_objects[key][:,-4] = self.rooms_with_objects[key][:,-3]
                 self.rooms_with_objects[key][:,3] = self.rooms_with_objects[key][:,2]
@@ -81,12 +83,14 @@ class House:
             else:
                 self.rooms_with_objects[key][:,-3] = self.rooms_with_objects[key][:,-2]
         self.room_doors = room_doors
-            #self.initial_rooms[key] = self.initial_rooms[key][1:,1:]
         if not show:
-            #cmapmine = ListedColormap(['lightgray','dodgerblue',"red"], N=3),,cmap=cmapmine
             plt.imshow(self.rooms_with_objects["IV"])
             plt.show()
+
     def build_partial_matrices(self,t):
+        """
+        Metoda do wyliczania wartości na brzegach każdego pokoju. 
+        """
         doors = self.params["doors"]
         for key, room in self.initial_rooms.items():
             top = room[:,0]
@@ -153,13 +157,59 @@ class House:
                 self.initial_rooms[door2.room_nr()][(x2-self.params["rooms"][door2.room_nr()].x_min()),
                                                      (y_min - self.params["rooms"][door2.room_nr()].y_min()):(y_max - self.params["rooms"][door2.room_nr()].y_min())] = np.mean(self.result_matrix[x_min:x_max, y_min:y_max])
 
-
-
     def build_result_matrix(self,t):
+        """
+        Metoda tworząca macierz wyników całego mieszkania 
+        """
         self.result_matrix[:,:] = self.outside_temp(t)
         for key, room in self.params["rooms"].items():
             self.result_matrix[room.x_min():room.x_max()+1, room.y_min():room.y_max()+1] = self.initial_rooms[key]
+
+
+        
+    def solution(self, D, time=10):
+        """
+        Metoda do przeprowadzenia symulacji rozchodzenia się ciepła.
+        """
+        dt = 1
+        dx = 1
+        self.build_result_matrix(0)
+        result_matrices = [self.result_matrix.copy()-273]
+        heat = np.zeros(len(range(1, time*60))+1)
+        for t in range(1, time*60):
+            for key, room in self.initial_rooms.items():
+                nrows, ncols = room.shape
+                room_dt = room.copy()
+                room_temp = np.mean(room)
+                for i in range(1, nrows - 1):
+                    for j in range(1, ncols - 1):
+                        if 0<self.rooms_with_objects[key][i,j]<1: 
+                            if room_temp < (self.rooms_with_objects[key][i,j]*10*3+10+273):
+                                laplacian = (room[i+1, j] + room[i-1, j] +
+                                            room[i, j+1] + room[i, j-1] -
+                                            4 * room[i, j]) / dx**2
+                                f = self.rooms_with_objects[key][i,j]*1.5**3*10
+                                heat[t] += f 
+                                laplacian = laplacian + f
+                                room_dt[i, j] = room[i, j] + D * laplacian * dt
+                        elif self.rooms_with_objects[key][i,j] == 1:
+                            room_dt[i, j] = self.outside_temp(t)
+                        else:
+                            laplacian = (room[i+1, j] + room[i-1, j] +
+                                        room[i, j+1] + room[i, j-1] -
+                                        4 * room[i, j]) / dx**2
+                            room_dt[i, j] = room[i, j] + D * laplacian * dt
+                self.initial_rooms[key] = room_dt
+            self.build_partial_matrices(t)
+            self.build_result_matrix(t)
+            result_matrices.append(self.result_matrix.copy()-273)
+        heat = np.cumsum(heat)
+        return result_matrices, heat
+
     def matrix_to_plot(self):
+        """
+        Mertoda przygotowująca dane do narysowania diagramu mieszkania.
+        """
         for key, room in self.params["rooms"].items():
             self.home[room.x_min():room.x_max(), room.y_min():room.y_max()] = 1
             self.home[room.x_min(), room.y_min():room.y_max()]=2
@@ -187,51 +237,12 @@ class House:
             else:
                 x_min, x_max, y = door.coordinates()
                 self.home[x_min:x_max, y] = 1
-        
-    def solution(self, D):
-        dt = 1
-        dx = 1
-        self.build_result_matrix(0)
-        result_matrices = [self.result_matrix.copy()-273]
-        #plt.imshow(result_matrices[0])
-        #plt.show()
-        heat = 0
-        for t in range(1, 10*60):
-            for key, room in self.initial_rooms.items():
-                nrows, ncols = room.shape
-                #room_dt = np.zeros_like(room)
-                room_dt = room.copy()
-                room_temp = np.mean(room)
-                for i in range(1, nrows - 1):
-                    for j in range(1, ncols - 1):
-                        #print("stara", room[i,j])
-                        if 0<self.rooms_with_objects[key][i,j]<1: 
-                            #print("check", self.rooms_with_objects[key][i,j]*10*3+10+273, room_temp < (self.rooms_with_objects[key][i,j]*10*3+10+273))
-                            if room_temp < (self.rooms_with_objects[key][i,j]*10*3+10+273):
-                                laplacian = (room[i+1, j] + room[i-1, j] +
-                                            room[i, j+1] + room[i, j-1] -
-                                            4 * room[i, j]) / dx**2
-                                f = self.rooms_with_objects[key][i,j]*10/10
-                                heat = heat + f
-                                laplacian = laplacian + f
-                                room_dt[i, j] = room[i, j] + D * laplacian * dt
-                        elif self.rooms_with_objects[key][i,j] == 1:
-                            room_dt[i, j] = self.outside_temp(t)
-                        else:
-                            laplacian = (room[i+1, j] + room[i-1, j] +
-                                        room[i, j+1] + room[i, j-1] -
-                                        4 * room[i, j]) / dx**2
-                            room_dt[i, j] = room[i, j] + D * laplacian * dt
-                self.initial_rooms[key] = room_dt
-            self.build_partial_matrices(t)
-            self.build_result_matrix(t)
-            result_matrices.append(self.result_matrix.copy()-273)
-        return result_matrices
 
     def show(self):
+        """
+        Metoda rysująca diagram domu.
+        """
         self.matrix_to_plot()
         cmapmine = ListedColormap(['lightgray','white','black','dodgerblue', 'red'], N=5)
         plt.imshow(self.home,cmap=cmapmine)
         plt.show()
-
- 

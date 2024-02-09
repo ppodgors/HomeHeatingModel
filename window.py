@@ -1,4 +1,3 @@
-import numpy as np
 class Window:
     def __init__(self, horizontal, start_idx, length, position, room):
         self.horizontal = horizontal
@@ -15,5 +14,3 @@ class Window:
     
     def room_nr(self):
         return self.room
-
-

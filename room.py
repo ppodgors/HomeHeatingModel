@@ -5,6 +5,7 @@ class Room:
          self.col_min = col_min
          self.col_max = col_max
          self.func = function
+         
     def y_len(self):
          return self.row_max - self.row_min
     

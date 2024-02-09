@@ -14,3 +14,4 @@ class Door:
 
     def room_nr(self):
         return self.room
+    

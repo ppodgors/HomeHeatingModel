@@ -22,3 +22,4 @@ class Heater:
     
     def get_level(self):
         return self.level
+    

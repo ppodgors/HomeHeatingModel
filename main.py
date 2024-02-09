@@ -1,12 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 from house import House
 from room import Room
 from window import Window
 from heater import Heater
 from door import Door
-from IPython.display import HTML
+
 if __name__=="__main__":
     rooms = {"I": Room(0, 50, 0, 39, (lambda x: 283 + np.random.random(x.shape))), "II": Room(0, 34, 40, 100,(lambda x: 290 + np.random.random(x.shape))),
               "III": Room(35, 60, 40, 100,(lambda x: 286 + np.random.random(x.shape))),"IV": Room(61, 100, 40, 80,(lambda x: 287 + np.random.random(x.shape))),
@@ -20,19 +18,6 @@ if __name__=="__main__":
              Door(False, 85,10,60,"III"),Door(False, 85,10,61,"V")]
     # [left, right, top, bottom] - is interior? T/F
     walls = {"I": [False, False, False, True], "II": [False, True, True, False], "III": [True, True, True, False], "IV":[True, False, False, True], "V": [True, False, True, False]} 
-    params = {"rooms": rooms, "windows": windows,"heaters": heaters, "doors": doors, "walls": walls, "domain": {"grid":np.meshgrid(np.linspace(-1,1,101), np.linspace(-1,1,101))[0]}}
+    params = {"rooms": rooms, "windows": windows,"heaters": heaters, "doors": doors, "walls": walls}
     home = House(params)
-    #home.show()
-    #home.build_partial_matrices()
     x = home.solution(0.1)
-    def update(frame_number, data, heatmap):
-        heatmap.set_array(data[frame_number])
-        return [heatmap]
-
-    fig, ax = plt.subplots()
-    heatmap = ax.imshow(x[0], cmap='hot', interpolation='nearest')
-
-    ani = animation.FuncAnimation(fig, update, frames=range(len(x)),
-                                fargs=(x, heatmap), blit=True)
-
-    HTML(ani.to_jshtml())
