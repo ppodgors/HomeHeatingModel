@@ -2,6 +2,7 @@
 
 Projekt symulacji ogrzewania mieszkania pozwala na modelowanie i wizualizację rozprzestrzeniania się ciepła w pomieszczeniach.
 
+[raport](https://github.com/ppodgors/HomeHeatingModel/blob/main/raport.ipynb)
 ## Wprowadzenie
 
 Model opiera się na równaniu reakcji-dyfuzji i uwzględnia różne warunki brzegowe dla okien, drzwi i ścian. 
